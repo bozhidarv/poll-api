@@ -7,11 +7,11 @@ import (
 )
 
 func GetRouter() chi.Router {
-	testRouter := chi.NewRouter()
+	healthRouter := chi.NewRouter()
 
-	testRouter.Head("/", func(w http.ResponseWriter, _ *http.Request) {
+	healthRouter.Head("/", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(200)
 	})
 
-	return testRouter
+	return healthRouter
 }

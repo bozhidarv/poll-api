@@ -9,6 +9,7 @@ import (
 
 	"github.com/bozhidarv/poll-api/common"
 	"github.com/bozhidarv/poll-api/health"
+	"github.com/bozhidarv/poll-api/polls"
 )
 
 func main() {
@@ -19,6 +20,7 @@ func main() {
 
 	// Setting up routers
 	mainRouter.Mount("/health", health.GetRouter())
+	mainRouter.Mount("/polls", polls.GetRouter())
 
 	// Starting the server
 	PORT := common.GetPort()
