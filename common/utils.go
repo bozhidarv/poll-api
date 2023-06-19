@@ -1,6 +1,7 @@
 package common
 
 import (
+	"net/http"
 	"os"
 	"strconv"
 )
@@ -17,6 +18,8 @@ func GetPort() int {
 	return 3000
 }
 
-
-
-
+func HandleError(err error, w *http.ResponseWriter) {
+	(*w).WriteHeader(500)
+	(*w).Write([]byte(err.Error()))
+	return
+}

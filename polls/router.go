@@ -2,11 +2,11 @@ package polls
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/bozhidarv/poll-api/common"
 	"github.com/bozhidarv/poll-api/services"
 )
 
@@ -14,16 +14,22 @@ func GetRouter() chi.Router {
 	pollsRouter := chi.NewRouter()
 
 	pollsRouter.Get("/", func(w http.ResponseWriter, _ *http.Request) {
-		services.OpenDbConnection()
-		defer services.CloseDbConn()
-		polls, err := services.GetAllPolls()
+		err := services.OpenDbConnection()
 		if err != nil {
-			w.Write([]byte(err.Error()))
-			w.WriteHeader(500)
+			common.HandleError(err, &w)
 			return
 		}
-		fmt.Println(len(polls))
+
+		defer services.CloseDbConn()
+
+		polls, err := services.GetAllPolls()
+		if err != nil {
+			common.HandleError(err, &w)
+			return
+		}
+
 		json.NewEncoder(w).Encode(polls)
+
 		w.WriteHeader(200)
 	})
 

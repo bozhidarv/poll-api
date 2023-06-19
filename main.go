@@ -19,7 +19,7 @@ func main() {
 	mainRouter.Use(middleware.Logger)
 
 	// Setting up routers
-	mainRouter.Mount("/health", health.GetRouter())
+	mainRouter.Mount("/app/health", health.GetRouter())
 	mainRouter.Mount("/polls", polls.GetRouter())
 
 	// Starting the server
