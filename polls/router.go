@@ -28,9 +28,13 @@ func GetRouter() chi.Router {
 			return
 		}
 
-		json.NewEncoder(w).Encode(polls)
-
-		w.WriteHeader(200)
+		w.Header().Set("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(polls)
+		if err != nil {
+			common.HandleError(err, &w)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
 	})
 
 	return pollsRouter
