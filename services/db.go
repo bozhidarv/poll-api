@@ -60,6 +60,10 @@ func GetAllPolls() ([]models.Poll, error) {
 	return polls, nil
 }
 
+func InsertNewPoll(poll models.Poll) (string, error)  {
+	return "", nil
+}
+
 func CloseDbConn() error {
 	err := db.Close()
 	if err != nil {
