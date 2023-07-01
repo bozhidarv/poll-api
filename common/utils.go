@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/rs/zerolog"
 )
 
 func GetPort() int {
@@ -18,7 +20,8 @@ func GetPort() int {
 	return 3000
 }
 
-func HandleError(err error, w *http.ResponseWriter) {
+func HandleError(err error, w *http.ResponseWriter, logger zerolog.Logger) {
+	logger.Error().Msg(err.Error())
 	(*w).WriteHeader(500)
 	(*w).Write([]byte(err.Error()))
 	return

@@ -2,8 +2,12 @@ package services
 
 import (
 	"database/sql"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"time"
 
+	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 
 	"github.com/bozhidarv/poll-api/polls/models"
@@ -23,9 +27,19 @@ func OpenDbConnection() error {
 }
 
 func checkDb() error {
+	if db == nil {
+		return errors.New("DB is null")
+	}
+
+	if db == nil {
+		err := OpenDbConnection()
+		if err != nil {
+			return err
+		}
+	}
+
 	err := db.Ping()
 	if err != nil {
-		fmt.Println(err.Error())
 		return err
 	}
 	return nil
@@ -41,7 +55,6 @@ func GetAllPolls() ([]models.Poll, error) {
 
 	rows, err := db.Query(`SELECT id, name, fields, created_by, last_updated FROM public.polls`)
 	if err != nil {
-		fmt.Println(err.Error())
 		return polls, err
 	}
 
@@ -50,7 +63,6 @@ func GetAllPolls() ([]models.Poll, error) {
 
 		err := rows.Scan(&poll.Id, &poll.Name, &poll.Fields, &poll.CreatedBy, &poll.LastUpdated)
 		if err != nil {
-			fmt.Println(err.Error())
 			return polls, err
 		}
 
@@ -60,14 +72,32 @@ func GetAllPolls() ([]models.Poll, error) {
 	return polls, nil
 }
 
-func InsertNewPoll(poll models.Poll) (string, error)  {
-	return "", nil
+func InsertNewPoll(poll models.Poll) error {
+	err := checkDb()
+	if err != nil {
+		return err
+	}
+
+	fieldsStr, err := json.Marshal(poll.Fields)
+	if err != nil {
+		return err
+	}
+	createdBy := uuid.New().String()
+
+	_, err = db.Exec(`INSERT INTO public.polls
+		("name", fields, created_by, last_updated)
+		VALUES($1, $2, $3, $4);`,
+		poll.Name, fieldsStr, createdBy, time.Now().UTC())
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func CloseDbConn() error {
 	err := db.Close()
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	return nil
