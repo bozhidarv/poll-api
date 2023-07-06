@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,7 +18,6 @@ func OpenDbConnection() error {
 	connStr := "postgres://postgres:poll-api@localhost:5432/postgres?sslmode=disable"
 	localDb, err := sql.Open("postgres", connStr)
 	if err != nil {
-		fmt.Println(err.Error())
 		return err
 	}
 	db = localDb
