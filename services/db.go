@@ -93,6 +93,28 @@ func InsertNewPoll(poll models.Poll) error {
 	return nil
 }
 
+func UpdatePoll(id string, poll models.Poll) error {
+	err := checkDb()
+	if err != nil {
+		return err
+	}
+
+	fieldsStr, err := json.Marshal(poll.Fields)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(`UPDATE public.polls
+		SET "name"=$1, fields=$2, last_updated=$3;
+		WHERE id=$4`,
+		poll.Name, fieldsStr, time.Now().UTC(), id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func CloseDbConn() error {
 	err := db.Close()
 	if err != nil {

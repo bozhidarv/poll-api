@@ -34,5 +34,12 @@ func main() {
 
 	// Starting the server
 	PORT := common.GetPort()
-	http.ListenAndServe(fmt.Sprintf(":%d", PORT), mainRouter)
+
+	fmt.Println("Server is up and running on port:", PORT)
+
+	err := http.ListenAndServe(fmt.Sprintf(":%d", PORT), mainRouter)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
 }

@@ -33,7 +33,7 @@ func GetRouter() chi.Router {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	pollsRouter.Post("/", func(w http.ResponseWriter, r *http.Request)  {
+	pollsRouter.Post("/", func(w http.ResponseWriter, r *http.Request) {
 		logger := httplog.LogEntry(r.Context())
 		defer r.Body.Close()
 		str, err := io.ReadAll(r.Body)
@@ -49,6 +49,31 @@ func GetRouter() chi.Router {
 		}
 
 		services.InsertNewPoll(poll)
+		if err != nil {
+			common.HandleError(err, &w, logger)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+
+	pollsRouter.Put("/{id}", func(w http.ResponseWriter, r *http.Request) {
+		pollId := chi.URLParam(r, "id")
+		logger := httplog.LogEntry(r.Context())
+		defer r.Body.Close()
+		str, err := io.ReadAll(r.Body)
+		if err != nil {
+			common.HandleError(err, &w, logger)
+			return
+		}
+		var poll models.Poll
+		err = json.Unmarshal(str, &poll)
+		if err != nil {
+			common.HandleError(err, &w, logger)
+			return
+		}
+
+		services.UpdatePoll(pollId, poll)
 		if err != nil {
 			common.HandleError(err, &w, logger)
 			return
