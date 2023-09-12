@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -25,10 +24,6 @@ func OpenDbConnection() error {
 }
 
 func checkDb() error {
-	if db == nil {
-		return errors.New("DB is null")
-	}
-
 	if db == nil {
 		err := OpenDbConnection()
 		if err != nil {
