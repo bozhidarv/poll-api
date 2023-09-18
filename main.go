@@ -30,7 +30,12 @@ func main() {
 	mainRouter.Mount("/polls", polls.GetRouter())
 
 	//Close db connection when the app closes
-	defer services.CloseDbConn()
+	defer func() {
+		err := services.CloseDbConn()
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+	}()
 
 	// Starting the server
 	PORT := common.GetPort()
