@@ -65,6 +65,29 @@ func GetAllPolls() ([]models.Poll, error) {
 	return polls, nil
 }
 
+func GetPollById(pollUuid string) (models.Poll, error) {
+	poll := new(models.Poll)
+
+	err := checkDb()
+	if err != nil {
+		return *poll, err
+	}
+
+	rows, err := db.Query(`SELECT id, name, fields, created_by, last_updated FROM public.polls WHERE id = $1`, pollUuid)
+	if err != nil {
+		return *poll, err
+	}
+
+	rows.Next()
+
+	err = rows.Scan(&poll.Id, &poll.Name, &poll.Fields, &poll.CreatedBy, &poll.LastUpdated)
+	if err != nil {
+		return *poll, err
+	}
+
+	return *poll, nil
+}
+
 func InsertNewPoll(poll models.Poll) error {
 	err := checkDb()
 	if err != nil {

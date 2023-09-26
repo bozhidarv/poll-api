@@ -33,6 +33,24 @@ func GetRouter() chi.Router {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	pollsRouter.Get("/{id}", func(w http.ResponseWriter, r *http.Request) {
+		pollId := chi.URLParam(r, "id")
+		logger := httplog.LogEntry(r.Context())
+		poll, err := services.GetPollById(pollId)
+		if err != nil {
+			common.HandleError(err, &w, logger)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(poll)
+		if err != nil {
+			common.HandleError(err, &w, logger)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	})
+
 	pollsRouter.Post("/", func(w http.ResponseWriter, r *http.Request) {
 		logger := httplog.LogEntry(r.Context())
 		defer r.Body.Close()
