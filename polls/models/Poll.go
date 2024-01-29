@@ -7,11 +7,11 @@ import (
 )
 
 type Poll struct {
-	Id          string    `json:"id"`
-	Name        string    `json:"name"`
-	Fields      Fields    `json:"fields"`
-	CreatedBy   string    `json:"created_by"`
-	LastUpdated time.Time `json:"last_updated"`
+	Id          *string    `json:"id,omitempty"`
+	Name        *string    `json:"name,omitempty"`
+	Fields      Fields     `json:"fields,omitempty"`
+	CreatedBy   *string    `json:"created_by,omitempty"`
+	LastUpdated *time.Time `json:"last_updated,omitempty"`
 }
 
 type (

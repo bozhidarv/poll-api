@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -39,8 +40,7 @@ func checkDb() error {
 }
 
 func GetAllPolls() ([]models.Poll, error) {
-	var polls []models.Poll
-
+	polls := make([]models.Poll, 0)
 	err := checkDb()
 	if err != nil {
 		return polls, err
@@ -73,12 +73,17 @@ func GetPollById(pollUuid string) (models.Poll, error) {
 		return *poll, err
 	}
 
-	rows, err := db.Query(`SELECT id, name, fields, created_by, last_updated FROM public.polls WHERE id = $1`, pollUuid)
+	rows, err := db.Query(
+		`SELECT id, name, fields, created_by, last_updated FROM public.polls WHERE id = $1`,
+		pollUuid,
+	)
 	if err != nil {
 		return *poll, err
 	}
 
-	rows.Next()
+	if !rows.Next() {
+		return *poll, errors.New("NOT_FOUND")
+	}
 
 	err = rows.Scan(&poll.Id, &poll.Name, &poll.Fields, &poll.CreatedBy, &poll.LastUpdated)
 	if err != nil {
@@ -121,7 +126,6 @@ func UpdatePoll(id string, poll models.Poll) error {
 	if err != nil {
 		return err
 	}
-
 	_, err = db.Exec(`UPDATE public.polls
 		SET "name"=$1, fields=$2, last_updated=$3;
 		WHERE id=$4`,
