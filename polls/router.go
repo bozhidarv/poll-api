@@ -108,5 +108,22 @@ func GetRouter() chi.Router {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	pollsRouter.Delete("/{id}", func(w http.ResponseWriter, r *http.Request) {
+		pollId := chi.URLParam(r, "id")
+		logger := httplog.LogEntry(r.Context())
+
+		err := services.DeletePoll(pollId)
+		if err != nil {
+			if err.Error() == "NOT_FOUND" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			common.HandleError(err, &w, logger)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+
 	return pollsRouter
 }

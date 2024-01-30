@@ -126,10 +126,33 @@ func UpdatePoll(id string, poll models.Poll) error {
 	if err != nil {
 		return err
 	}
+
 	res, err := db.Exec(`UPDATE public.polls
 		SET "name"=$1, fields=$2, last_updated=$3
 		WHERE id=$4`,
 		poll.Name, fieldsStr, time.Now().UTC(), id)
+
+	if err != nil {
+		return err
+	}
+
+	if n, err := res.RowsAffected(); n == 0 {
+		if err != nil {
+			return err
+		}
+		return errors.New("NOT_FOUND")
+	}
+
+	return nil
+}
+
+func DeletePoll(id string) error {
+	err := checkDb()
+	if err != nil {
+		return err
+	}
+
+	res, err := db.Exec(`DELETE FROM public.polls	WHERE id=$1`, id)
 
 	if err != nil {
 		return err
