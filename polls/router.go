@@ -95,8 +95,12 @@ func GetRouter() chi.Router {
 			return
 		}
 
-		services.UpdatePoll(pollId, poll)
+		err = services.UpdatePoll(pollId, poll)
 		if err != nil {
+			if err.Error() == "NOT_FOUND" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
 			common.HandleError(err, &w, logger)
 			return
 		}
