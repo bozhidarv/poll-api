@@ -4,20 +4,17 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/bozhidarv/poll-api/internal/routes"
+	"github.com/bozhidarv/poll-api/internal/services"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog"
-
-	"github.com/bozhidarv/poll-api/common"
-	"github.com/bozhidarv/poll-api/health"
-	"github.com/bozhidarv/poll-api/polls"
-	"github.com/bozhidarv/poll-api/services"
 )
 
 func main() {
 	mainRouter := chi.NewRouter()
 
-	logger := httplog.NewLogger("httplog-example")
+	logger := httplog.NewLogger("poll-api")
 
 	// Setting up middlewares
 	mainRouter.Use(middleware.RequestID)
@@ -26,10 +23,10 @@ func main() {
 	mainRouter.Use(middleware.AllowContentType("application/json"))
 
 	// Setting up routers
-	mainRouter.Mount("/app/health", health.GetRouter())
-	mainRouter.Mount("/polls", polls.GetRouter())
+	mainRouter.Mount("/app/health", routes.GetRouter())
+	mainRouter.Mount("/polls", routes.GetPollRouter())
 
-	//Close db connection when the app closes
+	// Close db connection when the app closes
 	defer func() {
 		err := services.CloseDbConn()
 		if err != nil {
@@ -38,7 +35,7 @@ func main() {
 	}()
 
 	// Starting the server
-	PORT := common.GetPort()
+	PORT := services.GetPort()
 
 	fmt.Println("Server is up and running on port:", PORT)
 
@@ -46,5 +43,4 @@ func main() {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-
 }
