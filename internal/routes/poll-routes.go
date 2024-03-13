@@ -22,7 +22,6 @@ func GetPollRouter() chi.Router {
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
 		err = json.NewEncoder(w).Encode(polls)
 		if err != nil {
 			services.HandleError(err, &w, logger)
@@ -40,7 +39,6 @@ func GetPollRouter() chi.Router {
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
 		err = json.NewEncoder(w).Encode(poll)
 		if err != nil {
 			services.HandleError(err, &w, logger)

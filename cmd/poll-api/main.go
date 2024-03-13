@@ -21,6 +21,7 @@ func main() {
 	mainRouter.Use(httplog.RequestLogger(logger))
 	mainRouter.Use(middleware.Recoverer)
 	mainRouter.Use(middleware.AllowContentType("application/json"))
+	mainRouter.Use(middleware.SetHeader("Content-Type", "application/json"))
 
 	// Setting up routers
 	mainRouter.Mount("/app/health", routes.GetRouter())
