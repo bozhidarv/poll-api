@@ -36,10 +36,6 @@ func GetPollRouter() chi.Router {
 		logger := httplog.LogEntry(r.Context())
 		poll, err := services.GetPollById(pollId)
 		if err != nil {
-			if err.Error() == "NOT_FOUND" {
-				w.WriteHeader(http.StatusNotFound)
-				return
-			}
 			services.HandleError(err, &w, logger)
 			return
 		}
@@ -95,10 +91,6 @@ func GetPollRouter() chi.Router {
 
 		err = services.UpdatePoll(pollId, poll)
 		if err != nil {
-			if err.Error() == "NOT_FOUND" {
-				w.WriteHeader(http.StatusNotFound)
-				return
-			}
 			services.HandleError(err, &w, logger)
 			return
 		}
@@ -112,10 +104,6 @@ func GetPollRouter() chi.Router {
 
 		err := services.DeletePoll(pollId)
 		if err != nil {
-			if err.Error() == "NOT_FOUND" {
-				w.WriteHeader(http.StatusNotFound)
-				return
-			}
 			services.HandleError(err, &w, logger)
 			return
 		}

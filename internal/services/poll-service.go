@@ -2,7 +2,6 @@ package services
 
 import (
 	"encoding/json"
-	"errors"
 	"time"
 
 	"github.com/bozhidarv/poll-api/internal/models"
@@ -53,7 +52,10 @@ func GetPollById(pollUuid string) (models.Poll, error) {
 	}
 
 	if !rows.Next() {
-		return *poll, errors.New("NOT_FOUND")
+		return *poll, &models.ApiError{
+			Code:    404,
+			Message: "No poll with the given id found.",
+		}
 	}
 
 	err = rows.Scan(&poll.Id, &poll.Name, &poll.Fields, &poll.CreatedBy, &poll.LastUpdated)
@@ -110,7 +112,10 @@ func UpdatePoll(id string, poll models.Poll) error {
 		if err != nil {
 			return err
 		}
-		return errors.New("NOT_FOUND")
+		return &models.ApiError{
+			Code:    404,
+			Message: "No poll with the given id found.",
+		}
 	}
 
 	return nil
@@ -131,7 +136,10 @@ func DeletePoll(id string) error {
 		if err != nil {
 			return err
 		}
-		return errors.New("NOT_FOUND")
+		return &models.ApiError{
+			Code:    404,
+			Message: "No poll with the given id found.",
+		}
 	}
 
 	return nil
