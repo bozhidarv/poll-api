@@ -26,6 +26,7 @@ func main() {
 	// Setting up routers
 	mainRouter.Mount("/app/health", routes.GetRouter())
 	mainRouter.Mount("/polls", routes.GetPollRouter())
+	mainRouter.Mount("/users", routes.GetUserRouter())
 
 	// Close db connection when the app closes
 	defer func() {
