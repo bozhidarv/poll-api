@@ -35,11 +35,6 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 
 		newCtx := context.WithValue(r.Context(), "userId", userId)
 
-		// validate the token
-		// if the token is invalid, return an unauthorized error
-		// if the token is valid, continue to the next middleware
-
-		// handle the request
 		handler.ServeHTTP(w, r.WithContext(newCtx))
 	})
 }

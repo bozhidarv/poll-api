@@ -14,20 +14,16 @@ import (
 func main() {
 	mainRouter := chi.NewRouter()
 
-	// Setting up middlewares
 	mainRouter.Use(middleware.RequestID)
 	mainRouter.Use(httplog.RequestLogger(services.Logger))
 	mainRouter.Use(middleware.Recoverer)
 	mainRouter.Use(middleware.AllowContentType("application/json"))
 	mainRouter.Use(middleware.SetHeader("Content-Type", "application/json"))
 
-	// Setting up routers
-	mainRouter.Mount("/app/health", routes.GetRouter())
 	mainRouter.Mount("/polls", routes.GetPollRouter())
 	userRouter := routes.UserRoutes{}
 	mainRouter.Mount("/", userRouter.GetUnprotectedUserRouter())
 
-	// Close db connection when the app closes
 	defer func() {
 		err := services.CloseDbConn()
 		if err != nil {
@@ -35,7 +31,6 @@ func main() {
 		}
 	}()
 
-	// Starting the server
 	PORT := services.GetPort()
 
 	fmt.Println("Server is up and running on port:", PORT)
