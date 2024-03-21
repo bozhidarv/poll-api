@@ -1,4 +1,4 @@
-version: '3.1'
+version: "2.25"
 
 services:
   db:
@@ -6,7 +6,7 @@ services:
     restart: always
     environment:
       POSTGRES_PASSWORD: poll-api
-    ports: 
+    ports:
       - "5432:5432"
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/1-init.sql

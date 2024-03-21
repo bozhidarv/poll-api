@@ -5,17 +5,19 @@ import (
 	"time"
 
 	"github.com/bozhidarv/poll-api/internal/models"
-	"github.com/google/uuid"
 )
 
-func GetAllPolls() ([]models.Poll, error) {
+func GetAllPollsForUser(userId string) ([]models.Poll, error) {
 	polls := make([]models.Poll, 0)
 	err, db := CheckDb()
 	if err != nil {
 		return polls, err
 	}
 
-	rows, err := db.Query(`SELECT id, name, fields, created_by, last_updated FROM public.polls`)
+	rows, err := db.Query(
+		`SELECT id, name, fields, created_by, last_updated FROM public.polls WHERE created_by = $1`,
+		userId,
+	)
 	if err != nil {
 		return polls, err
 	}
@@ -76,12 +78,11 @@ func InsertNewPoll(poll models.Poll) error {
 	if err != nil {
 		return err
 	}
-	createdBy := uuid.New().String()
 
 	_, err = db.Exec(`INSERT INTO public.polls
 		("name", fields, created_by, last_updated)
 		VALUES($1, $2, $3, $4);`,
-		poll.Name, fieldsStr, createdBy, time.Now().UTC())
+		poll.Name, fieldsStr, poll.CreatedBy, time.Now().UTC())
 	if err != nil {
 		return err
 	}

@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/bozhidarv/poll-api/internal/models"
-	"github.com/rs/zerolog"
+	"github.com/go-chi/httplog"
 )
 
 func GetPort() int {
@@ -22,8 +22,10 @@ func GetPort() int {
 	return 3000
 }
 
-func HandleError(err error, w *http.ResponseWriter, logger zerolog.Logger) {
-	logger.Error().Msg(err.Error())
+var Logger = httplog.NewLogger("poll-api")
+
+func HandleError(err error, w *http.ResponseWriter) {
+	Logger.Error().Msg(err.Error())
 	apiError, ok := err.(*models.ApiError)
 	if !ok {
 		apiError = &models.ApiError{
@@ -32,8 +34,8 @@ func HandleError(err error, w *http.ResponseWriter, logger zerolog.Logger) {
 		}
 	}
 
-	json.NewEncoder(*w).Encode(apiError)
 	(*w).WriteHeader(apiError.Code)
+	json.NewEncoder(*w).Encode(apiError)
 
 	return
 }

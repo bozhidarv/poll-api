@@ -5,26 +5,29 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/bozhidarv/poll-api/internal/middleware"
 	"github.com/bozhidarv/poll-api/internal/models"
 	"github.com/bozhidarv/poll-api/internal/services"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/httplog"
 )
 
 func GetPollRouter() chi.Router {
 	pollsRouter := chi.NewRouter()
 
+	pollsRouter.Use(middleware.AuthMiddleware)
+
 	pollsRouter.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		logger := httplog.LogEntry(r.Context())
-		polls, err := services.GetAllPolls()
+		userId := r.Context().Value("userId").(string)
+
+		polls, err := services.GetAllPollsForUser(userId)
 		if err != nil {
-			services.HandleError(err, &w, logger)
+			services.HandleError(err, &w)
 			return
 		}
 
 		err = json.NewEncoder(w).Encode(polls)
 		if err != nil {
-			services.HandleError(err, &w, logger)
+			services.HandleError(err, &w)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
@@ -32,39 +35,40 @@ func GetPollRouter() chi.Router {
 
 	pollsRouter.Get("/{id}", func(w http.ResponseWriter, r *http.Request) {
 		pollId := chi.URLParam(r, "id")
-		logger := httplog.LogEntry(r.Context())
 		poll, err := services.GetPollById(pollId)
 		if err != nil {
-			services.HandleError(err, &w, logger)
+			services.HandleError(err, &w)
 			return
 		}
 
 		err = json.NewEncoder(w).Encode(poll)
 		if err != nil {
-			services.HandleError(err, &w, logger)
+			services.HandleError(err, &w)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
 	})
 
 	pollsRouter.Post("/", func(w http.ResponseWriter, r *http.Request) {
-		logger := httplog.LogEntry(r.Context())
 		defer r.Body.Close()
 		str, err := io.ReadAll(r.Body)
 		if err != nil {
-			services.HandleError(err, &w, logger)
+			services.HandleError(err, &w)
 			return
 		}
 		var poll models.Poll
 		err = json.Unmarshal(str, &poll)
 		if err != nil {
-			services.HandleError(err, &w, logger)
+			services.HandleError(err, &w)
 			return
 		}
 
+		userId := r.Context().Value("userId").(string)
+		poll.CreatedBy = &userId
+
 		err = services.InsertNewPoll(poll)
 		if err != nil {
-			services.HandleError(err, &w, logger)
+			services.HandleError(err, &w)
 			return
 		}
 
@@ -73,23 +77,22 @@ func GetPollRouter() chi.Router {
 
 	pollsRouter.Put("/{id}", func(w http.ResponseWriter, r *http.Request) {
 		pollId := chi.URLParam(r, "id")
-		logger := httplog.LogEntry(r.Context())
 		defer r.Body.Close()
 		str, err := io.ReadAll(r.Body)
 		if err != nil {
-			services.HandleError(err, &w, logger)
+			services.HandleError(err, &w)
 			return
 		}
 		var poll models.Poll
 		err = json.Unmarshal(str, &poll)
 		if err != nil {
-			services.HandleError(err, &w, logger)
+			services.HandleError(err, &w)
 			return
 		}
 
 		err = services.UpdatePoll(pollId, poll)
 		if err != nil {
-			services.HandleError(err, &w, logger)
+			services.HandleError(err, &w)
 			return
 		}
 
@@ -98,11 +101,10 @@ func GetPollRouter() chi.Router {
 
 	pollsRouter.Delete("/{id}", func(w http.ResponseWriter, r *http.Request) {
 		pollId := chi.URLParam(r, "id")
-		logger := httplog.LogEntry(r.Context())
 
 		err := services.DeletePoll(pollId)
 		if err != nil {
-			services.HandleError(err, &w, logger)
+			services.HandleError(err, &w)
 			return
 		}
 
