@@ -35,6 +35,8 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 
 		newCtx := context.WithValue(r.Context(), "userId", userId)
 
+		w.Header().Add("Authorization", authHeader)
+
 		handler.ServeHTTP(w, r.WithContext(newCtx))
 	})
 }

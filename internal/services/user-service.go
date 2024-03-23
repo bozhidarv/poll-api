@@ -1,6 +1,7 @@
 package services
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -16,12 +17,12 @@ func hashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func checkPasswordHash(password, hash string) bool {
+func CheckPasswordValidity(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
 
-func RegisterUser(user models.User) (string, error) {
+func CreateUser(user models.User) (string, error) {
 	err, db := CheckDb()
 	if err != nil {
 		return "", err
@@ -52,6 +53,40 @@ func RegisterUser(user models.User) (string, error) {
 	}
 
 	return userId, nil
+}
+
+func GetUserByEmail(email string) (*models.User, error) {
+	err, db := CheckDb()
+	if err != nil {
+		return nil, err
+	}
+
+	row := db.QueryRow(
+		`SELECT id, username, email, password, last_updated FROM users WHERE email = $1`,
+		email,
+	)
+
+	var user models.User
+	err = row.Scan(&user.Id, &user.Username, &user.Email, &user.Password, &user.LastUpdated)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			apiError := &models.ApiError{
+				Code:    404,
+				Message: "User with this email does not exist.",
+			}
+
+			return nil, apiError
+		}
+
+		apiError := &models.ApiError{
+			Code:    500,
+			Message: "Error while logging user in.",
+		}
+
+		return nil, apiError
+	}
+
+	return &user, nil
 }
 
 func CreateJwtToken(userId string) string {
