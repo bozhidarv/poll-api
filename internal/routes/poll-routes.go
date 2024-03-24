@@ -5,10 +5,11 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+
 	"github.com/bozhidarv/poll-api/internal/middleware"
 	"github.com/bozhidarv/poll-api/internal/models"
 	"github.com/bozhidarv/poll-api/internal/services"
-	"github.com/go-chi/chi/v5"
 )
 
 func GetPollRouter() chi.Router {

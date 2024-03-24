@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/bozhidarv/poll-api/internal/routes"
-	"github.com/bozhidarv/poll-api/internal/services"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog"
+
+	"github.com/bozhidarv/poll-api/internal/routes"
+	"github.com/bozhidarv/poll-api/internal/services"
 )
 
 func main() {

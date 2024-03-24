@@ -6,8 +6,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/bozhidarv/poll-api/internal/models"
 	"github.com/go-chi/httplog"
+
+	"github.com/bozhidarv/poll-api/internal/models"
 )
 
 func GetPort() int {

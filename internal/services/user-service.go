@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bozhidarv/poll-api/internal/models"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/bozhidarv/poll-api/internal/models"
 )
 
 const JWT_SECRET = "asfbgakjl;gawobi;ioragjewgnVENBVRWOB"
