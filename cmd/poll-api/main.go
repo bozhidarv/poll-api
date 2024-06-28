@@ -24,6 +24,7 @@ func main() {
 	mainRouter.Mount("/polls", routes.GetPollRouter())
 	userRouter := routes.UserRoutes{}
 	mainRouter.Mount("/", userRouter.GetUnprotectedUserRouter())
+	mainRouter.Mount("/users", userRouter.GetProtectedUserRoutes())
 
 	defer func() {
 		err := services.CloseDbConn()

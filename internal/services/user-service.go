@@ -81,7 +81,41 @@ func GetUserByEmail(email string) (*models.User, error) {
 
 		apiError := &models.ApiError{
 			Code:    500,
-			Message: "Error while logging user in.",
+			Message: "Error while getting user",
+		}
+
+		return nil, apiError
+	}
+
+	return &user, nil
+}
+
+func GetUserById(userId string) (*models.User, error) {
+	err, db := CheckDb()
+	if err != nil {
+		return nil, err
+	}
+
+	row := db.QueryRow(
+		`SELECT id, username, email, last_updated FROM users WHERE id = $1`,
+		userId,
+	)
+
+	var user models.User
+	err = row.Scan(&user.Id, &user.Username, &user.Email, &user.LastUpdated)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			apiError := &models.ApiError{
+				Code:    404,
+				Message: "User with this id does not exist.",
+			}
+
+			return nil, apiError
+		}
+
+		apiError := &models.ApiError{
+			Code:    500,
+			Message: "Error while getting user",
 		}
 
 		return nil, apiError

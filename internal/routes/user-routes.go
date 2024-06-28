@@ -103,5 +103,16 @@ func (*UserRoutes) GetProtectedUserRoutes() chi.Router {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	userRoutes.Get("/me", func(w http.ResponseWriter, r *http.Request) {
+		userId := r.Context().Value("userId").(string)
+		user, err := services.GetUserById(userId)
+		if err != nil {
+			services.HandleError(err, &w)
+			return
+		}
+
+		json.NewEncoder(w).Encode(user)
+	})
+
 	return userRoutes
 }
