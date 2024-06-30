@@ -32,3 +32,17 @@ CREATE TABLE IF NOT EXISTS polls (
     FOREIGN KEY (created_by)
         references users(id)
 );
+
+CREATE TABLE IF NOT EXISTS votes (
+    "poll_id" uuid,
+    "user_id" uuid,
+    "entry" jsonb NOT NULL,
+    "last_updated" timestamp,
+
+    CONSTRAINT pk_polls_votes_poll_id_fk_key
+    FOREIGN KEY (poll_id)
+        references polls(id),
+    CONSTRAINT pk_polls_votes_user_id_fk_key
+    FOREIGN KEY (user_id)
+        references users(id)
+);
