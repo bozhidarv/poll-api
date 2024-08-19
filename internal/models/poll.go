@@ -9,6 +9,7 @@ import (
 type Poll struct {
 	Id          *string    `json:"id,omitempty"`
 	Name        *string    `json:"name,omitempty"`
+	Category    *string    `json:"category,omitempty"`
 	Fields      Fields     `json:"fields,omitempty"`
 	CreatedBy   *string    `json:"created_by,omitempty"`
 	LastUpdated *time.Time `json:"last_updated,omitempty"`

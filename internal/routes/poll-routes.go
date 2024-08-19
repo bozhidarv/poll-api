@@ -18,9 +18,26 @@ func GetPollRouter() chi.Router {
 	pollsRouter.Use(middleware.AuthMiddleware)
 
 	pollsRouter.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		userId := r.Context().Value("userId").(string)
 
-		polls, err := services.GetAllPollsForUser(userId)
+		filters := models.PollFilters{}
+
+		if userIds := r.URL.Query().Get("userIds"); userIds != "" {
+			filters.UserIds = &userIds
+		} else {
+			userId, ok := r.Context().Value("userId").(string)
+			if !ok {
+				services.HandleError(&models.ApiError{Code: 401, Message: "Unauthorized"}, &w)
+				return
+			}
+
+			filters.UserIds = &userId
+		}
+
+		if category := r.URL.Query().Get("category"); category != "" {
+			filters.Category = &category
+		}
+
+		polls, err := services.GetAllPollsForUser(filters)
 		if err != nil {
 			services.HandleError(err, &w)
 			return

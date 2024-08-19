@@ -23,12 +23,13 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS polls (
     "id"   uuid DEFAULT uuid_generate_v4() NOT NULL,
     "name" varchar(150),
+    "category" varchar(150),
     "fields" jsonb NOT NULL,
     "created_by" uuid,
     "last_updated" timestamp,
 
     CONSTRAINT pk_polls_key PRIMARY KEY ("id"),
-    CONSTRAINT pk_polls_created_by_fk_key 
+    CONSTRAINT pk_polls_created_by_fk_key
     FOREIGN KEY (created_by)
         references users(id)
 );

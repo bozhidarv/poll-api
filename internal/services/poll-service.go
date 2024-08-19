@@ -2,22 +2,50 @@ package services
 
 import (
 	"encoding/json"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/bozhidarv/poll-api/internal/models"
 )
 
-func GetAllPollsForUser(userId string) ([]models.Poll, error) {
+func GetAllPollsForUser(pollFilters models.PollFilters) ([]models.Poll, error) {
 	polls := make([]models.Poll, 0)
 	err, db := CheckDb()
+
 	if err != nil {
 		return polls, err
 	}
 
-	rows, err := db.Query(
-		`SELECT id, name, fields, created_by, last_updated FROM public.polls WHERE created_by = $1`,
-		userId,
-	)
+	queryStr := `SELECT id, name, category, fields, created_by, last_updated FROM public.polls`
+	queryArgs := []string{}
+	argNo := 1
+
+	if pollFilters.Empty() {
+		return polls, nil
+	}
+
+	if *pollFilters.UserIds != "" {
+		userIdsArr := strings.Split(*pollFilters.UserIds, ";")
+
+		queryArgs = append(queryArgs, userIdsArr...)
+
+		for i := 1; i < len(userIdsArr); i++ {
+			userIdsArr[i] = "$" + string(argNo)
+			argNo++
+		}
+
+		queryStr += fmt.Sprintf(` WHERE created_by IN (%s)`, strings.Join(userIdsArr, ","))
+	}
+
+	if *pollFilters.Category != "" {
+		queryStr += ` AND category = $` + string(argNo)
+		queryArgs = append(queryArgs, *pollFilters.Category)
+		argNo++
+	}
+
+	rows, err := db.Query(queryStr, queryArgs)
+	defer rows.Close()
 	if err != nil {
 		return polls, err
 	}
@@ -25,7 +53,7 @@ func GetAllPollsForUser(userId string) ([]models.Poll, error) {
 	for rows.Next() {
 		poll := new(models.Poll)
 
-		err := rows.Scan(&poll.Id, &poll.Name, &poll.Fields, &poll.CreatedBy, &poll.LastUpdated)
+		err := rows.Scan(&poll.Id, &poll.Name, &poll.Category, &poll.Fields, &poll.CreatedBy, &poll.LastUpdated)
 		if err != nil {
 			return polls, err
 		}
@@ -46,7 +74,7 @@ func GetPollById(pollUuid string) (models.Poll, error) {
 	}
 
 	rows, err := db.Query(
-		`SELECT id, name, fields, created_by, last_updated FROM public.polls WHERE id = $1`,
+		`SELECT id, name, category, fields, created_by, last_updated FROM public.polls WHERE id = $1`,
 		pollUuid,
 	)
 	if err != nil {
@@ -60,7 +88,7 @@ func GetPollById(pollUuid string) (models.Poll, error) {
 		}
 	}
 
-	err = rows.Scan(&poll.Id, &poll.Name, &poll.Fields, &poll.CreatedBy, &poll.LastUpdated)
+	err = rows.Scan(&poll.Id, &poll.Name, &poll.Category, &poll.Fields, &poll.CreatedBy, &poll.LastUpdated)
 	if err != nil {
 		return *poll, err
 	}
@@ -80,9 +108,9 @@ func InsertNewPoll(poll models.Poll) error {
 	}
 
 	_, err = db.Exec(`INSERT INTO public.polls
-		("name", fields, created_by, last_updated)
+		("name", category, fields, created_by, last_updated)
 		VALUES($1, $2, $3, $4);`,
-		poll.Name, fieldsStr, poll.CreatedBy, time.Now().UTC())
+		poll.Name, poll.Category, fieldsStr, poll.CreatedBy, time.Now().UTC())
 	if err != nil {
 		return err
 	}
@@ -104,7 +132,7 @@ func UpdatePoll(id string, poll models.Poll) error {
 	res, err := db.Exec(`UPDATE public.polls
 		SET "name"=$1, fields=$2, last_updated=$3
 		WHERE id=$4`,
-		poll.Name, fieldsStr, time.Now().UTC(), id)
+		poll.Name, poll.Category, fieldsStr, time.Now().UTC(), id)
 	if err != nil {
 		return err
 	}
